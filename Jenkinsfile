@@ -12,13 +12,13 @@ pipeline {
     stages {
         stage('Preparação do Ambiente') {
             steps {
-                echo 'ja instalado'
+                sh 'pip install -r requisitos.txt'
             }
         }
 
         stage('Execução do Teste Levenshtein') {
             steps {
-                sh 'python3 levenshtein_teste.py'
+                sh 'python levenshtein_teste.py'
             }
         }
 
@@ -36,29 +36,35 @@ pipeline {
 
         stage('Execução do Chatbot') {
             steps {
-                sh "python3 chat_bot.py '${params.QUESTION}'"
+                sh 'python chat_bot.py'
             }
         }
     }
 
     post {
         success {
-            emailext (
-                to: "${RECIPIENT_EMAIL}",
-                subject: "Pipeline Success: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: """<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' succeeded.</p>
-                         <p>Check console output at ${env.BUILD_URL}</p>""",
-                mimeType: 'text/html'
-            )
+            steps {
+                script {
+                    sh """
+                        python send_email.py \
+                            "Pipeline Success: ${env.JOB_NAME} - ${env.BUILD_NUMBER}" \
+                            "<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' succeeded.</p><p>Check console output at ${env.BUILD_URL}</p>" \
+                            "${RECIPIENT_EMAIL}"
+                    """
+                }
+            }
         }
         failure {
-            emailext (
-                to: "${RECIPIENT_EMAIL}",
-                subject: "Pipeline Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: """<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' failed.</p>
-                         <p>Check console output at ${env.BUILD_URL}</p>""",
-                mimeType: 'text/html'
-            )
+            steps {
+                script {
+                    sh """
+                        python send_email.py \
+                            "Pipeline Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}" \
+                            "<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' failed.</p><p>Check console output at ${env.BUILD_URL}</p>" \
+                            "${RECIPIENT_EMAIL}"
+                    """
+                }
+            }
         }
     }
 }
