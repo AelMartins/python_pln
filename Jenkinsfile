@@ -12,13 +12,13 @@ pipeline {
     stages {
         stage('Preparação do Ambiente') {
             steps {
-                sh 'pip install -r requisitos.txt'
+                echo 'ja instalado'
             }
         }
 
         stage('Execução do Teste Levenshtein') {
             steps {
-                sh 'python levenshtein_teste.py'
+                sh 'python3 levenshtein_teste.py'
             }
         }
 
@@ -36,33 +36,16 @@ pipeline {
 
         stage('Execução do Chatbot') {
             steps {
-                sh 'python chat_bot.py'
+                sh "python3 chat_bot.py '${params.QUESTION}'"
             }
         }
-    }
 
-    post {
-        success {
+        stage('Envio de e-mail') {
             steps {
                 script {
-                    sh """
-                        python send_email.py \
-                            "Pipeline Success: ${env.JOB_NAME} - ${env.BUILD_NUMBER}" \
-                            "<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' succeeded.</p><p>Check console output at ${env.BUILD_URL}</p>" \
-                            "${RECIPIENT_EMAIL}"
-                    """
-                }
-            }
-        }
-        failure {
-            steps {
-                script {
-                    sh """
-                        python send_email.py \
-                            "Pipeline Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}" \
-                            "<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' failed.</p><p>Check console output at ${env.BUILD_URL}</p>" \
-                            "${RECIPIENT_EMAIL}"
-                    """
+                    def subject = "Pipeline: ${env.JOB_NAME} - ${env.BUILD_NUMBER}"
+                    def body = "<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' completed.</p><p>Check console output at ${env.BUILD_URL}</p>"
+                    sh "python3 send_email.py '${subject}' '${body}' '${RECIPIENT_EMAIL}'"
                 }
             }
         }
