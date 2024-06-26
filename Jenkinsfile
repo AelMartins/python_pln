@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'PERGUNTA', defaultValue: '', description: 'Pergunta a ser processada pelo chatbot')
+        string(name: 'QUESTION', defaultValue: '', description: 'Faça uma pergunta ao chat-bot!')
     }
 
     stages {
