@@ -1,13 +1,10 @@
 pipeline {
     agent any
 
-    environment {
-        RECIPIENT_EMAIL = 'samuelluizmartinsdossantos@gmail.com'
-    }
-
     stages {
         stage('Preparação do Ambiente') {
             steps {
+                
                 sh 'pip install -r requisitos.txt'
             }
         }
@@ -35,26 +32,11 @@ pipeline {
                 sh 'python chat_bot.py'
             }
         }
-    }
 
-    post {
-        success {
-            emailext (
-                to: "${RECIPIENT_EMAIL}",
-                subject: "Pipeline Success: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: """<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' succeeded.</p>
-                         <p>Check console output at ${env.BUILD_URL}</p>""",
-                mimeType: 'text/html'
-            )
-        }
-        failure {
-            emailext (
-                to: "${RECIPIENT_EMAIL}",
-                subject: "Pipeline Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: """<p>Pipeline '${env.JOB_NAME} - ${env.BUILD_NUMBER}' failed.</p>
-                         <p>Check console output at ${env.BUILD_URL}</p>""",
-                mimeType: 'text/html'
-            )
+        stage('Envio de e-mail') {
+            steps {
+                sh 'python send_email.py'
+            }
         }
     }
 }
