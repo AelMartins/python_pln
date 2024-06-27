@@ -7,7 +7,7 @@ def send_email(subject, body, to_email):
     from_password = 'yqfv pvuz kxoa rrjj'
 
     # Configuração do servidor SMTP
-    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server = smtplib.SMTP('smtp.gmail.com', 465)
     server.starttls()
     server.login(from_email, from_password)
 
