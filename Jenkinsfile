@@ -50,4 +50,9 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            mail body: 'Build de pergunta executado', cc: '', subject: 'Executado Build', to: 'samuelluizmartinsdossantos@gmail.com'
+        }
+    }
 }
